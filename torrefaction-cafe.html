@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>La torréfaction — CS Métiers du Bar</title>
+<style>
+  :root{
+    --noir:#14110F;
+    --or:#C9A227;
+    --or-clair:#E3C766;
+    --blanc:#FFFFFF;
+    --rouge-err:#8B2E2E;
+    --vert-ok:#3E6B4F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html, body{ height:100%; overflow:hidden; }
+  body{
+    height:100vh; height:100dvh;
+    font-family:Arial, sans-serif;
+    background:var(--noir);
+    color:var(--blanc);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(201,162,39,0.10), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(201,162,39,0.08), transparent 45%),
+      repeating-linear-gradient(135deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 4px);
+    pointer-events:none; z-index:0;
+  }
+  .stage{
+    position:relative; z-index:1;
+    width:min(96vw, 980px);
+    height:min(94dvh, 640px);
+    border:1px solid rgba(201,162,39,0.35);
+    border-radius:clamp(10px,1.5vw,16px);
+    display:flex; flex-direction:column;
+    overflow:hidden;
+    background:rgba(20,17,15,0.4);
+  }
+  header{
+    text-align:center;
+    padding:clamp(10px,2vh,18px) clamp(12px,3vw,24px) clamp(6px,1.2vh,10px);
+    border-bottom:1px solid rgba(201,162,39,0.25);
+    flex-shrink:0;
+  }
+  .eyebrow{
+    display:inline-block;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    font-size:clamp(10px,1.1vw,12px);
+    color:var(--or);
+    margin-bottom:4px;
+  }
+  h1{
+    font-size:clamp(18px,2.6vw,26px);
+    color:var(--or-clair);
+    font-weight:700;
+  }
+  .sub{
+    font-size:clamp(11px,1.2vw,13px);
+    color:rgba(255,255,255,0.65);
+    margin-top:4px;
+  }
+  main{
+    flex:1;
+    display:flex;
+    min-height:0;
+    padding:clamp(10px,2vw,20px);
+    gap:clamp(10px,2vw,20px);
+  }
+  .diagram-col{
+    flex:0 0 42%;
+    display:flex; align-items:center; justify-content:center;
+    min-width:0;
+  }
+  .diagram-col svg{ width:100%; height:auto; max-height:100%; }
+  .info-col{
+    flex:1;
+    display:flex; flex-direction:column;
+    gap:clamp(6px,1vh,10px);
+    min-width:0;
+    justify-content:space-evenly;
+  }
+  .hotspot-btn{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(201,162,39,0.3);
+    border-radius:10px;
+    padding:clamp(8px,1.4vh,12px) clamp(10px,1.4vw,14px);
+    cursor:pointer;
+    min-height:44px;
+    text-align:left;
+    color:var(--blanc);
+    font-family:Arial, sans-serif;
+    transition:all .2s;
+  }
+  .hotspot-btn:hover{ border-color:var(--or); background:rgba(201,162,39,0.08); }
+  .hotspot-btn.active{
+    background:rgba(201,162,39,0.14);
+    border-color:var(--or);
+    box-shadow:0 0 0 1px var(--or) inset;
+  }
+  .num{
+    flex-shrink:0;
+    width:clamp(24px,2.4vw,30px); height:clamp(24px,2.4vw,30px);
+    border-radius:50%;
+    background:var(--or); color:var(--noir);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:clamp(12px,1.3vw,14px);
+  }
+  .label{
+    font-size:clamp(12px,1.4vw,15px);
+    font-weight:700;
+    color:var(--or-clair);
+  }
+  .detail{
+    margin-top:clamp(6px,1vh,10px);
+    padding:clamp(10px,1.6vh,14px);
+    border-radius:10px;
+    background:rgba(0,0,0,0.35);
+    border:1px solid rgba(201,162,39,0.25);
+    font-size:clamp(12px,1.3vw,14px);
+    line-height:1.5;
+    color:rgba(255,255,255,0.9);
+    min-height:clamp(64px,12vh,90px);
+  }
+  .maillard{
+    font-size:clamp(10.5px,1.15vw,12px);
+    color:var(--or);
+    margin-top:6px;
+    font-style:italic;
+  }
+  footer{
+    flex-shrink:0;
+    text-align:center;
+    padding:clamp(6px,1.2vh,10px);
+    font-size:clamp(9px,1vw,11px);
+    color:rgba(255,255,255,0.45);
+    border-top:1px solid rgba(201,162,39,0.2);
+  }
+  .part{ transition:opacity .25s, filter .25s; opacity:0.35; }
+  .part.on{ opacity:1; filter:drop-shadow(0 0 6px rgba(201,162,39,0.6)); }
+  .drum-lines{ transform-origin:200px 230px; }
+  .part.on .drum-lines{ animation:spin 2.2s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  @media (max-width:899px){
+    main{ flex-direction:column; }
+    .diagram-col{ flex:0 0 auto; max-height:38%; }
+    .info-col{ flex:1; }
+  }
+  @media (max-width:640px){
+    .hotspot-btn{ padding:8px 10px; }
+    .label{ font-size:12px; }
+    .detail{ font-size:11.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <header>
+    <span class="eyebrow">Module 5.2 · Le café</span>
+    <h1>La torréfaction</h1>
+    <p class="sub">Touchez chaque étape du torréfacteur pour comprendre ce qu'il s'y passe</p>
+  </header>
+
+  <main>
+    <div class="diagram-col">
+      <svg viewBox="0 0 400 460" xmlns="http://www.w3.org/2000/svg">
+        <!-- Trémie -->
+        <g id="p1" class="part on">
+          <polygon points="150,20 250,20 220,90 180,90" fill="none" stroke="#C9A227" stroke-width="3"/>
+          <rect x="175" y="90" width="50" height="18" fill="none" stroke="#C9A227" stroke-width="3"/>
+        </g>
+        <!-- Tambour rotatif -->
+        <g id="p2" class="part on">
+          <circle cx="200" cy="230" r="95" fill="none" stroke="#C9A227" stroke-width="4"/>
+          <g class="drum-lines">
+            <line x1="200" y1="140" x2="200" y2="320" stroke="#E3C766" stroke-width="2" opacity="0.6"/>
+            <line x1="110" y1="230" x2="290" y2="230" stroke="#E3C766" stroke-width="2" opacity="0.6"/>
+            <line x1="137" y1="167" x2="263" y2="293" stroke="#E3C766" stroke-width="2" opacity="0.4"/>
+            <line x1="137" y1="293" x2="263" y2="167" stroke="#E3C766" stroke-width="2" opacity="0.4"/>
+          </g>
+        </g>
+        <!-- Trappe -->
+        <g id="p3" class="part on">
+          <rect x="180" y="325" width="40" height="14" fill="none" stroke="#C9A227" stroke-width="3"/>
+          <polygon points="180,339 220,339 235,365 165,365" fill="none" stroke="#C9A227" stroke-width="3"/>
+        </g>
+        <!-- Bac de refroidissement -->
+        <g id="p4" class="part on">
+          <rect x="90" y="380" width="220" height="55" rx="8" fill="none" stroke="#C9A227" stroke-width="3"/>
+          <line x1="105" y1="407" x2="295" y2="407" stroke="#E3C766" stroke-width="2" stroke-dasharray="6 6"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="info-col" id="btns">
+      <button class="hotspot-btn" data-i="1" data-part="p1">
+        <span class="num">1</span>
+        <span class="label">La trémie</span>
+      </button>
+      <button class="hotspot-btn" data-i="2" data-part="p2">
+        <span class="num">2</span>
+        <span class="label">Le tambour rotatif</span>
+      </button>
+      <button class="hotspot-btn" data-i="3" data-part="p3">
+        <span class="num">3</span>
+        <span class="label">La trappe</span>
+      </button>
+      <button class="hotspot-btn" data-i="4" data-part="p4">
+        <span class="num">4</span>
+        <span class="label">Le bac de refroidissement</span>
+      </button>
+      <div class="detail" id="detail">Sélectionnez une étape pour découvrir ce qu'il s'y passe.</div>
+    </div>
+  </main>
+
+  <footer>Le café · Contenu apprenant</footer>
+</div>
+
+<script>
+  const data = {
+    1: {
+      text: "Lorsque la bonne température est atteinte à l'intérieur du torréfacteur, on ouvre la trémie&nbsp;: les grains verts tombent dans le tambour.",
+      maillard: ""
+    },
+    2: {
+      text: "Comme dans une machine à laver, un double tambour rotatif brasse les grains en continu pendant la cuisson.",
+      maillard: "C'est ici qu'opère la réaction de Maillard et Strecker&nbsp;: la transformation chimique en chaîne qui crée l'arôme du café."
+    },
+    3: {
+      text: "Dès que la torréfaction est jugée terminée, on ouvre une trappe&nbsp;: les grains tombent dans le bac de refroidissement.",
+      maillard: ""
+    },
+    4: {
+      text: "Les grains y sont brassés en continu pendant une dizaine de minutes pour faire baisser leur température.",
+      maillard: "Même une fois expulsé hors du torréfacteur, le café continue de cuire au cœur du grain."
+    }
+  };
+
+  const btns = document.querySelectorAll('.hotspot-btn');
+  const detail = document.getElementById('detail');
+  const parts = document.querySelectorAll('.part');
+
+  function select(i){
+    btns.forEach(b => b.classList.toggle('active', b.dataset.i === String(i)));
+    parts.forEach(p => p.classList.toggle('on', p.id === 'p' + i));
+    const d = data[i];
+    detail.innerHTML = d.text + (d.maillard ? '<div class="maillard">' + d.maillard + '</div>' : '');
+  }
+
+  btns.forEach(b => b.addEventListener('click', () => select(b.dataset.i)));
+  select(1);
+</script>
+</body>
+</html>
